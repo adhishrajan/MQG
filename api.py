@@ -29,6 +29,7 @@ headers = {
     "X-RapidAPI-Host": "seeking-alpha.p.rapidapi.com"
 }
 
+transcripts=[]
 for i in ids:
     params = {
         'id': i
@@ -38,7 +39,21 @@ for i in ids:
 
     if response.status_code == 200:
         data = response.json()
-        print(data)
+        transcripts.append(data['data']['attributes']['content'])
+            
     else:
         print("Failed to fetch data:", response.status_code)
 
+from bs4 import BeautifulSoup
+cleaned_transcripts=[]
+# GET CLEANED VERSION OF TRANSCRIPTS
+for i in transcripts:
+    soup = BeautifulSoup(i, 'html.parser')
+
+
+    text_only = soup.get_text(separator='\n', strip=True)
+
+    cleaned_transcripts.append(text_only)
+
+
+print(cleaned_transcripts)
