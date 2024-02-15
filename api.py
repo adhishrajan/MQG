@@ -3,11 +3,11 @@ from bs4 import BeautifulSoup
 import csv
 import time
 
-csv_file_path = 'data.csv'
+csv_file_path = 'data_adhish.csv'
 
 symbol = "https://seeking-alpha.p.rapidapi.com/transcripts/v2/list"
 headers = {
-    "X-RapidAPI-Key": "c9f7c1c3e6msh3c74da27d61c57bp10d5a5jsn6d02057ed4e1",
+    "X-RapidAPI-Key": "0e0cd97c71msh08e10f88aea835fp1b9d57jsnf7cae9ca0c87",
     "X-RapidAPI-Host": "seeking-alpha.p.rapidapi.com"
 }
 
@@ -17,7 +17,7 @@ quarters = ['Q1', 'Q2', 'Q3', 'Q4']
 
 # JPM
 jpm_params = {
-    'id': 'jpm',
+    'id': 'aapl',
     'size': '40'
 }
 response = requests.get(symbol, headers=headers, params=jpm_params)
@@ -33,13 +33,13 @@ if response.status_code == 200:
         for quarter_ in quarters:
             if quarter_ in d['attributes']['title']:
                 quarter = quarter_
-        res.append(('jpm', quarter, date, id))
+        res.append(('aapl', quarter, date, id))
 else:
     print("Failed to fetch data:", response.status_code)
 
 # GS
 gs_params = {
-    'id': 'gs',
+    'id': 'msft',
     'size': '40'
 }
 response = requests.get(symbol, headers=headers, params=gs_params)
@@ -55,13 +55,13 @@ if response.status_code == 200:
         for quarter_ in quarters:
             if quarter_ in d['attributes']['title']:
                 quarter = quarter_
-        res.append(('gs', quarter, date, id))
+        res.append(('msft', quarter, date, id))
 else:
     print("Failed to fetch data:", response.status_code)
 
-# BAC
+# BACmsft
 bac_params = {
-    'id': 'bac',
+    'id': 'goog',
     'size': '40'
 }
 response = requests.get(symbol, headers=headers, params=bac_params)
@@ -77,13 +77,13 @@ if response.status_code == 200:
         for quarter_ in quarters:
             if quarter_ in d['attributes']['title']:
                 quarter = quarter_
-        res.append(('bac', quarter, date, id))
+        res.append(('goog', quarter, date, id))
 else:
     print("Failed to fetch data:", response.status_code)
 
 # C
 c_params = {
-    'id': 'c',
+    'id': 'meta',
     'size': '40'
 }
 response = requests.get(symbol, headers=headers, params=c_params)
@@ -99,13 +99,13 @@ if response.status_code == 200:
         for quarter_ in quarters:
             if quarter_ in d['attributes']['title']:
                 quarter = quarter_
-        res.append(('c', quarter, date, id))
+        res.append(('meta', quarter, date, id))
 else:
     print("Failed to fetch data:", response.status_code)
 
 # MS
 ms_params = {
-    'id': 'ms',
+    'id': 'tsla',
     'size': '40'
 }
 response = requests.get(symbol, headers=headers, params=ms_params)
@@ -121,13 +121,13 @@ if response.status_code == 200:
         for quarter_ in quarters:
             if quarter_ in d['attributes']['title']:
                 quarter = quarter_
-        res.append(('ms', quarter, date, id))
+        res.append(('tsla', quarter, date, id))
 else:
     print("Failed to fetch data:", response.status_code)
 
 # BCS
 bcs_params = {
-    'id': 'bcs',
+    'id': 'crm',
     'size': '40'
 }
 response = requests.get(symbol, headers=headers, params=bcs_params)
@@ -143,13 +143,13 @@ if response.status_code == 200:
         for quarter_ in quarters:
             if quarter_ in d['attributes']['title']:
                 quarter = quarter_
-        res.append(('bcs', quarter, date, id))
+        res.append(('crm', quarter, date, id))
 else:
     print("Failed to fetch data:", response.status_code)
 
 # DB
 db_params = {
-    'id': 'db',
+    'id': 'amd',
     'size': '40'
 }
 response = requests.get(symbol, headers=headers, params=db_params)
@@ -165,13 +165,13 @@ if response.status_code == 200:
         for quarter_ in quarters:
             if quarter_ in d['attributes']['title']:
                 quarter = quarter_
-        res.append(('db', quarter, date, id))
+        res.append(('amd', quarter, date, id))
 else:
     print("Failed to fetch data:", response.status_code)
 
 # BMO
 bmo_params = {
-    'id': 'bmo',
+    'id': 'intc',
     'size': '40'
 }
 response = requests.get(symbol, headers=headers, params=bmo_params)
@@ -187,17 +187,15 @@ if response.status_code == 200:
         for quarter_ in quarters:
             if quarter_ in d['attributes']['title']:
                 quarter = quarter_
-        res.append(('bmo', quarter, date, id))
+        res.append(('intc', quarter, date, id))
 else:
     print("Failed to fetch data:", response.status_code)
 
 
 
-
-
 symbol = "https://seeking-alpha.p.rapidapi.com/transcripts/v2/get-details"
 headers = {
-    "X-RapidAPI-Key": "c9f7c1c3e6msh3c74da27d61c57bp10d5a5jsn6d02057ed4e1",
+    "X-RapidAPI-Key": "0e0cd97c71msh08e10f88aea835fp1b9d57jsnf7cae9ca0c87",
     "X-RapidAPI-Host": "seeking-alpha.p.rapidapi.com"
 }
 
@@ -211,8 +209,10 @@ for company, quarter, date, id in res:
     }
     response = requests.get(symbol, headers=headers, params=params)
     if response.status_code == 200:
-        transcript = response.json()['data']['attributes']['content']
-        new_res.append((company, quarter, date, f'"{transcript}"'))
+        transcript = response.json()['data']['attributes']['content'][:32000]
+        soup = BeautifulSoup(transcript, 'html.parser')
+        text_only = soup.get_text().replace('\n', ' ')
+        new_res.append((company, quarter, date, text_only))
     else:
         print("Failed to fetch data:", response.status_code)
 
@@ -223,6 +223,10 @@ with open(csv_file_path, 'w', newline='', encoding='utf-8') as csv_file:
     writer.writerow(['Company', 'Quarter', 'Year', 'Transcript'])
     for row in new_res:
         writer.writerow(row)
+
+
+
+
 
 # url = "https://seeking-alpha.p.rapidapi.com/transcripts/v2/get-details"
 # headers = {
@@ -255,6 +259,7 @@ with open(csv_file_path, 'w', newline='', encoding='utf-8') as csv_file:
 #     text_only = soup.get_text(separator='\n', strip=True)
 
 #     cleaned_transcripts.append(text_only)
+
 
 
 # print(cleaned_transcripts)
